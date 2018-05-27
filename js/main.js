@@ -7,20 +7,19 @@ document.querySelector('input').focus();
 // Include a text field that will be revealed when the "Other" option is selected from the "Job Role" drop down menu.
 // Give the field an id of “other-title,” and add the placeholder text of "Your Job Role" to the field.
 const fields = document.querySelector('fieldset');
-const otherInput = document.createElement('input');
-otherInput.type = 'text';
-otherInput.id = 'other-title';
-otherInput.placeholder = 'Your Job Role';
+const otherInput = document.getElementById('other-title');
 
 const option = document.querySelector('option').value;
+
+otherInput.style.display = 'none';
 
 // need to add an event listener to check which option has been chosen
 const jobRole = fields.addEventListener('change', (e) => {
     if(e.target.value === 'other') {
-        fields.appendChild(otherInput);
+        otherInput.style.display = 'block';
         // remove otherInput if it exists
     } else if (document.getElementById('other-title')) {
-        fields.removeChild(otherInput);
+        otherInput.style.display = 'none';
     }
 });
 
@@ -31,8 +30,14 @@ const colors = document.querySelectorAll('#color option');
 const designOptions = document.getElementById('design');
 
 designOptions.addEventListener('change', () => {
+    // show the color div if design is chosen
+    document.getElementById('colors-js-puns').style.display = 'block';
+
     // need to get the text content of the selected option
     const designTheme = designOptions.options[designOptions.selectedIndex].textContent.toLowerCase();
+    if(designTheme == 'select theme') {
+        document.getElementById('colors-js-puns').style.display = 'none';
+    }
 
     const splitDesignTheme = designTheme.split('- ')[1];
 
@@ -84,9 +89,11 @@ activitiesArea.addEventListener('change', (e) => {
         if(activityText.includes(activityTime) && e.target.parentNode.textContent != activityText)
         {
             document.querySelectorAll('.activities input')[i].setAttribute('disabled', 'true');
+            document.querySelectorAll('.activities input')[i].parentNode.style.color = "gray";
 
             if(isEnabled) {
                 document.querySelectorAll('.activities input')[i].removeAttribute('disabled', 'true');
+                document.querySelectorAll('.activities input')[i].parentNode.style.color = "#000";
             }
         }
 
@@ -116,7 +123,7 @@ creditCardDiv.style.display = 'block';
 paypalDiv.style.display = 'none';
 bitcoinDiv.style.display = 'none';
 
-const paymentMethod = paymentSelect.options[paymentSelect.selectedIndex].textContent.toLowerCase();
+let paymentMethod = paymentSelect.options[paymentSelect.selectedIndex].textContent.toLowerCase();
 
 paymentSelect.addEventListener('change', (e) => { 
     paymentMethod = paymentSelect.options[paymentSelect.selectedIndex].textContent.toLowerCase();
@@ -141,10 +148,10 @@ paymentSelect.addEventListener('change', (e) => {
 // STEP 6
 
 // make name required
-document.getElementById('name').required = true;
+// document.getElementById('name').required = true;
 
 // check if valid email
-document.getElementById('mail').required = true;
+// document.getElementById('mail').required = true;
 
 // get the submit button
 const submitForm = document.getElementsByTagName('button')[0];
@@ -159,9 +166,18 @@ const cvv = document.getElementById('cvv');
 
 // user must choose atleast one activity
 function validate() {
+    if(document.getElementById('name').value == "") {
+        nameError();
+    }
+
+    if(document.getElementById('mail').value == "") {
+        emailError();
+    }
+
+    var isChecked;
     for (let i = 0; i < numActivities; i += 1)
     {
-        var isChecked = document.querySelectorAll('.activities input')[i].checked;
+        isChecked = document.querySelectorAll('.activities input')[i].checked;
         if(isChecked) {
             // if credit card, make sure user supplied credit card number, zipcode, cvv
             if (paymentMethod == 'credit card') {
@@ -175,15 +191,128 @@ function validate() {
                         if(cvv.value.length == 3 && !isNaN(cvv.value)) {
                             console.log('cvv is fine');
                             return true;
+                        } else {
+                            cvvError();
+                            properCVV();
                         }
+                    } else {
+                        zipError();
+                        properZip();
                     }
+                } else {
+                    ccError();
                 }
             } else {
                 return true;
             }
         }
     }
+
+    if(!isChecked) {
+        activitiesError();
+    }
+
     return false;
 }
 
 // STEP 7
+
+// name error indication
+function nameError() {
+    document.getElementById('name').style.border = "red solid 1px";
+    document.querySelector('[for="name"]').innerHTML += ' Please enter your name';
+    document.querySelector('[for="name"]').style.color = 'red';
+    return false;
+}
+// email error indication
+function emailError() {
+    document.getElementById('mail').style.border = "red solid 1px";
+    document.querySelector('[for="mail"]').innerHTML += ' Please enter your email';
+    document.querySelector('[for="mail"]').style.color = 'red';
+}
+
+// register for activity indicator
+function activitiesError() {
+    document.querySelector('.activities legend').innerHTML += ' (Please register for ATLEAST one activity.)';
+    document.querySelector('.activities legend').style.color = 'red';
+}
+
+// credit card indicator
+function ccError() {
+    ccNum.style.border = "red 1px solid";
+    properCC();
+}
+// zip indicator
+function zipError() {
+    zip.style.border = "red 1px solid";
+    document.querySelector('[for="zip"]').innerHTML += ' Wrong Zip Code.';
+    document.querySelector('[for="zip"]').style.color = 'red';
+}
+// cvv indicator
+function cvvError() {
+    cvv.style.border = "red 1px solid";
+    document.querySelector('[for="cvv"]').innerHTML += ' Incorrect CVV.';
+    document.querySelector('[for="cvv"]').style.color = 'red';
+}
+
+// STEP 8
+
+// No Javascript
+// Added 'other' input into HTML
+
+// STEP 9
+
+// Hide color label and select menu of tshirt until design is selected
+document.getElementById('colors-js-puns').style.display = 'none';
+
+// STEP 10
+// Conditional Error Messages
+const originalCreditCardText =  document.querySelector('[for="cc-num"]').innerHTML;
+
+function properCC() {
+    console.log('Enter a proper cc');
+
+    if (ccNum.value.length < 1) {
+        document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
+        document.querySelector('[for="cc-num"]').style.color = 'red';
+    }
+    else if(isNaN(ccNum.value)) {
+        document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Card Number contains letters.';
+        document.querySelector('[for="cc-num"]').style.color = 'red';
+
+    } else if (ccNum.value.length > 16) {
+        document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered more than 16 digits.';
+        document.querySelector('[for="cc-num"]').style.color = 'red';
+    }
+    else if (ccNum.value.length < 13)
+    {
+        document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered less than 13 digits.';
+        document.querySelector('[for="cc-num"]').style.color = 'red';
+    } else {
+        document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
+        document.querySelector('[for="cc-num"]').style.color = 'red';
+    }
+}
+
+function properZip() {
+    console.log('Enter a proper zip');
+}
+
+function properCVV() {
+    console.log('Enter a proper cvv');
+}
+
+// STEP 11
+// Real-time error messages
+document.getElementById('mail').addEventListener('input', (e) => {
+    var emailInput = e.target.value;
+
+
+    // email input needs to have (text) + @ + (text) + . + (text)
+    if (!emailInput.includes('@'))
+        console.log('please enter a correct email');
+    else if (!emailInput.includes('.')) 
+    {
+        console.log('please enter a correct email');
+    }
+});
