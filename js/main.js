@@ -34,9 +34,16 @@ designOptions.addEventListener('change', () => {
     document.getElementById('colors-js-puns').style.display = 'block';
 
     // need to get the text content of the selected option
-    const designTheme = designOptions.options[designOptions.selectedIndex].textContent.toLowerCase();
+    var designTheme = designOptions.options[designOptions.selectedIndex].textContent.toLowerCase();
     if(designTheme == 'select theme') {
         document.getElementById('colors-js-puns').style.display = 'none';
+    } else if(designTheme.includes('js puns')) {
+        colors[0].setAttribute('selected','true')
+        colors[3].removeAttribute('selected');
+    }
+    else {
+        colors[3].setAttribute('selected','true')
+        colors[0].removeAttribute('selected');
     }
 
     const splitDesignTheme = designTheme.split('- ')[1];
@@ -184,31 +191,29 @@ function validate() {
         }
     }
 
-    // if credit card, make sure user supplied credit card number, zipcode, cvv
-    if (paymentMethod == 'credit card') {
-        // check if cc lenght is between 13 and 16 and if its a number
-        if(ccNum.value.length >= 13 && ccNum.value.length <= 16 && !isNaN(ccNum.value)) {
-            console.log('credit card is fine');
-            // check if zipcode is 5 digits
-            if(zip.value.length == 5 && !isNaN(zip.value)) {
-                console.log('zip is fine');
-                // check if cvv is 3 digits
-                if(cvv.value.length == 3 && !isNaN(cvv.value)) {
-                    console.log('cvv is fine');
-                    return true;
-                } else {
-                    cvvError();
-                    properCVV();
-                }
-            } else {
-                zipError();
-                properZip();
-            }
-        } else {
-            ccError();
-        }
+    // check if cc lenght is between 13 and 16 and if its a number
+    if (paymentMethod == 'credit card' 
+            && ccNum.value.length >= 13 
+            && ccNum.value.length <= 16 
+            && !isNaN(ccNum.value)) {
+        console.log('credit card is fine');
+    } else
+      ccError();
+
+
+    if(zip.value.length == 5 && !isNaN(zip.value)) {
+        console.log('zip is fine');
+    } else 
+    {
+        zipError();
+        properZip(); 
+    }
+
+    if(cvv.value.length == 3 && !isNaN(cvv.value)) {
+        console.log('cvv is fine');
     } else {
-        return true;
+        cvvError();
+        properCVV();
     }
 
     return false;
@@ -275,29 +280,33 @@ const originalCreditCardText =  document.querySelector('[for="cc-num"]').innerHT
 
 function properCC() {
     console.log('Enter a proper cc');
-
-    
+  
     if (ccNum.value.length < 1) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
+        return false;
     }
     else if(isNaN(ccNum.value)) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Card Number contains letters.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
+        return false;
 
     } else if (ccNum.value.length > 16) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered more than 16 digits.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
+        return false;
     }
     else if (ccNum.value.length < 13)
     {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered less than 13 digits.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
+        return false;
     } 
     else if (ccNum.value.length == 0)
     {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
+        return false;
     }
 }
 
