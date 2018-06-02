@@ -171,52 +171,88 @@ const ccNum = document.getElementById('cc-num');
 const zip = document.getElementById('zip');
 const cvv = document.getElementById('cvv');
 
+var nameFill = true;
+var emailFill = true;
+var activityFill = true;
+var ccFill = true;
+
 // user must choose atleast one activity
 function validate() {
+
     if(document.getElementById('name').value == "") {
         nameError();
+        nameFill = false;
+    } else {
+        document.getElementById('name').style.border = "2px solid #c1deeb";
+        document.querySelector('[for="name"]').innerHTML = originalName;
+        document.querySelector('[for="name"]').style.color = '#184f68';
+        nameFill = true;
     }
 
     if(document.getElementById('mail').value == "") {
         emailError();
+        emailFill = false;
     }
 
     var isChecked;
     for (let i = 0; i < numActivities; i += 1)
     {
         isChecked = document.querySelectorAll('.activities input')[i].checked;
-
-        if(!isChecked) {
+        if(isChecked) {
+            activityFill = true;
+            document.querySelector('.activities legend').innerHTML = originalActivity;
+            document.querySelector('.activities legend').style.color = '#184f68';
+            break;
+        } else if(!isChecked) {
             activitiesError();
+            activityFill = false;
         }
     }
 
-    // check if cc lenght is between 13 and 16 and if its a number
-    if (paymentMethod == 'credit card' 
-            && ccNum.value.length >= 13 
-            && ccNum.value.length <= 16 
-            && !isNaN(ccNum.value)) {
-        console.log('credit card is fine');
-    } else
-      ccError();
-
-
-    if(zip.value.length == 5 && !isNaN(zip.value)) {
-        console.log('zip is fine');
-    } else 
+    if(paymentMethod == 'credit card' ) 
     {
-        zipError();
-        properZip(); 
-    }
+        // check if cc lenght is between 13 and 16 and if its a number
+        if (ccNum.value.length >= 13 
+                && ccNum.value.length <= 16 
+                && !isNaN(ccNum.value)) {
+            ccFill = true;
+            ccNum.style.border = "2px solid #c1deeb";
+            document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText;
+            document.querySelector('[for="cc-num"]').style.color = '#184f68';
+        } else {
+            ccError();
+            ccFill = false;
+        }
 
-    if(cvv.value.length == 3 && !isNaN(cvv.value)) {
-        console.log('cvv is fine');
+        if(zip.value.length == 5 && !isNaN(zip.value)) {
+            ccFill = true;
+            zip.style.border = "2px solid #c1deeb";
+            document.querySelector('[for="zip"]').innerHTML = originalCreditCardText;
+            document.querySelector('[for="zip"]').style.color = '#184f68';
+        } else {
+            zipError();
+            ccFill = false;
+        }
+
+        if(cvv.value.length == 3 && !isNaN(cvv.value)) {
+            ccFill = true;
+            cvv.style.border = "2px solid #c1deeb";
+            document.querySelector('[for="cvv"]').innerHTML = originalCreditCardText;
+            document.querySelector('[for="cvvm"]').style.color = '#184f68';
+        } else {
+            cvvError();
+            ccFill = false;
+        }
     } else {
-        cvvError();
-        properCVV();
+        ccFill = true;
     }
 
-    return false;
+    if(ccFill && nameFill && emailFill && activityFill)
+        return true;
+    else {
+        formCheck.style.display = 'block';
+        return false;
+    }   
 }
 
 // STEP 7
@@ -224,20 +260,20 @@ function validate() {
 const originalName = document.querySelector('[for="name"]').innerHTML;
 const originalEmail = document.querySelector('[for="mail"]').innerHTML;
 const originalActivity = document.querySelector('.activities legend').innerHTML;
+const originalzip = document.querySelector('[for="zip"]').innerHTML;
+const originalCVV = document.querySelector('[for="cvv"]').innerHTML;
 
 // name error indication
 function nameError() {
     document.getElementById('name').style.border = "red solid 1px";
     document.querySelector('[for="name"]').innerHTML = originalName + ' Please enter your name';
     document.querySelector('[for="name"]').style.color = 'red';
-    return false;
 }
 // email error indication
 function emailError() {
     document.getElementById('mail').style.border = "red solid 1px";
     document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Please enter your email';
     document.querySelector('[for="mail"]').style.color = 'red';
-    return false;
 }
 
 // register for activity indicator
@@ -246,21 +282,16 @@ function activitiesError() {
     document.querySelector('.activities legend').style.color = 'red';
 }
 
-// credit card indicator
-function ccError() {
-    ccNum.style.border = "red 1px solid";
-    properCC();
-}
 // zip indicator
 function zipError() {
     zip.style.border = "red 1px solid";
-    document.querySelector('[for="zip"]').innerHTML += ' Zip Code must be 5 digits.';
+    document.querySelector('[for="zip"]').innerHTML = originalzip + ' Zip Code must be 5 digits.';
     document.querySelector('[for="zip"]').style.color = 'red';
 }
 // cvv indicator
 function cvvError() {
     cvv.style.border = "red 1px solid";
-    document.querySelector('[for="cvv"]').innerHTML += ' CVV Must be 3 digits.';
+    document.querySelector('[for="cvv"]').innerHTML = originalCVV + ' CVV Must be 3 digits.';
     document.querySelector('[for="cvv"]').style.color = 'red';
 }
 
@@ -277,42 +308,39 @@ document.getElementById('colors-js-puns').style.display = 'none';
 // STEP 10
 // Conditional Error Messages
 const originalCreditCardText =  document.querySelector('[for="cc-num"]').innerHTML;
-
-function properCC() {
-    console.log('Enter a proper cc');
-  
+// credit card indicator
+function ccError() {
+    ccNum.style.border = "red 1px solid";
     if (ccNum.value.length < 1) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
-        return false;
+        //return false;
     }
     else if(isNaN(ccNum.value)) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Card Number contains letters.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
-        return false;
 
     } else if (ccNum.value.length > 16) {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered more than 16 digits.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
-        return false;
     }
     else if (ccNum.value.length < 13)
     {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Entered less than 13 digits.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
-        return false;
     } 
     else if (ccNum.value.length == 0)
     {
         document.querySelector('[for="cc-num"]').innerHTML = originalCreditCardText + ' Please enter a credit card number.';
         document.querySelector('[for="cc-num"]').style.color = 'red';
-        return false;
     }
 }
 
 // STEP 11
 // Real-time error messages
 const mailInput = document.getElementById('mail');
+
+var correctEmail = false;
 
 mailInput.addEventListener('input', (e) => {
     var emailInput = e.target.value;
@@ -323,7 +351,6 @@ mailInput.addEventListener('input', (e) => {
         mailInput.style.border = "red solid 1px";
         document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Missing "@" sign.';
         document.querySelector('[for="mail"]').style.color = 'red';
-        return false;
     }
     else if (emailInput.includes('.')-1) 
     {
@@ -331,7 +358,6 @@ mailInput.addEventListener('input', (e) => {
         document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Missing a "domain".';
         document.querySelector('[for="mail"]').style.color = 'red';
         console.log('missing domain');
-        return false;
     }
     else if (mailInput.value.indexOf('.')-1 == mailInput.value.indexOf('@')) 
     {
@@ -339,25 +365,34 @@ mailInput.addEventListener('input', (e) => {
         document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Enter a host';
         document.querySelector('[for="mail"]').style.color = 'red';
         console.log('wrong domain');
-        return false;
     }
     else if(mailInput.value.split('.')[1].length < 2) {
         mailInput.style.border = "red solid 1px";
         document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Missing domain suffix.';
         document.querySelector('[for="mail"]').style.color = 'red';
         console.log('please enter an email');
-        return false;
     }
     else if(emailInput.length == 0) {
         mailInput.style.border = "red solid 1px";
         document.querySelector('[for="mail"]').innerHTML = originalEmail + ' Missing email.';
         document.querySelector('[for="mail"]').style.color = 'red';
         console.log('please enter an email');
-        return false;
     }
     else {
         mailInput.style.border = "2px solid #c1deeb";
         document.querySelector('[for="mail"]').innerHTML = originalEmail;
-        document.querySelector('[for="mail"]').style.color = 'black';
+        document.querySelector('[for="mail"]').style.color = '#184f68';
+        correctEmail = true;
+        emailFill = true;
     }
 });
+
+// Extra Step
+
+// Appending text div to register button to display "invalid form fill" 
+const formArea = document.querySelector('form');
+const formCheck = document.createElement('div');
+formCheck.innerHTML = '<strong>Please make sure you have entered all fields correctly</strong>';
+formArea.appendChild(formCheck);
+formCheck.style.color = 'red';
+formCheck.style.display = 'none';
